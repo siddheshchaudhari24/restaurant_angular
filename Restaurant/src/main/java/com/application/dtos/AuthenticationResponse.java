@@ -1,14 +1,39 @@
 package com.application.dtos;
 
+import com.application.enums.UserRole;
+
 public final class AuthenticationResponse {
-    private final String jwt;
+    private String jwt;
+    
+    private UserRole userRole;
+    
+    private Long userId;
 
-    public AuthenticationResponse(String jwt) {
-        this.jwt = jwt;
-    }
+	public UserRole getUserRole() {
+		return userRole;
+	}
 
-    public String getJwt() {
-        return jwt;
-    }
+	public void setUserRole(UserRole userRole) {
+		this.userRole = userRole;
+	}
+
+	public Long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
+
+	public String getJwt() {
+		return jwt;
+	}
+
+	public void setJwt(String jwt) {
+		this.jwt = jwt;
+	}
+	
+    
+    
 }
 

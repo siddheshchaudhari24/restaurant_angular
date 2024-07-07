@@ -1,6 +1,7 @@
 package com.application.controller;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -14,13 +15,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.application.dao.UserRepository;
 import com.application.dtos.AuthenticationRequest;
 import com.application.dtos.AuthenticationResponse;
 import com.application.dtos.SignupRequest;
 import com.application.dtos.UserDto;
+import com.application.model.User;
 import com.application.service.auth.AuthService;
 import com.application.service.auth.jwt.UserDetailsServiceImpl;
 import com.application.util.JwtUtil;
@@ -36,11 +38,14 @@ public class AuthController {
 	
 	private final JwtUtil jwtUtil;
 	
-	public AuthController(AuthService authService, AuthenticationManager authenticationManager, UserDetailsServiceImpl userDetailsServiceImpl, JwtUtil jwtUtil) {
+	private final UserRepository userRepository;
+	
+	public AuthController(AuthService authService, AuthenticationManager authenticationManager, UserDetailsServiceImpl userDetailsServiceImpl, JwtUtil jwtUtil, UserRepository userRepository) {
 		this.jwtUtil = jwtUtil;
 		this.userDetailsService = userDetailsServiceImpl;
 		this.authService = authService;
 		this.authenticationManager = authenticationManager;
+		this.userRepository = userRepository;
 	}
 	
 	@PostMapping("/signup")
@@ -66,7 +71,12 @@ public class AuthController {
 		
 		final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getEmail());
 		final String jwt = jwtUtil.generateToken(userDetails.getUsername());
-		return new AuthenticationResponse(jwt);
+		Optional<User> optionalUser = userRepository.findFirstByEmail(userDetails.getUsername());
+		AuthenticationResponse authenticationResponse = new AuthenticationResponse();
+		authenticationResponse.setJwt(jwt);
+		authenticationResponse.setUserRole(optionalUser.get().getUserRole());
+		authenticationResponse.setUserId(optionalUser.get().getId());
+		return authenticationResponse;
 		
 	}
 
